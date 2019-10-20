@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-void main (){
+void main() {
   runApp(MaterialApp(
     home: Home(),
   ));
@@ -16,12 +16,146 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final _toDoController = TextEditingController();
 
   List _toDoList = [];
 
+  Map<String, dynamic> _lastRemove;
+  int _lastRemovepos;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _readData().then((data) {
+      setState(() {
+        _toDoList = json.decode(data);
+      });
+    });
+  }
+
+  void _addToDo() {
+    setState(() {
+      Map<String, dynamic> newToDo = Map();
+      newToDo["title"] = _toDoController.text;
+      _toDoController.text = "";
+      newToDo["ok"] = false;
+      newToDo["dataBase"] = "dataTarefa";
+      newToDo["dataFim"] = "dataConcluida";
+      _toDoList.add(newToDo);
+      _saveData();
+    });
+  }
+
+  Future<Null> _refresh() async {
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      _toDoList.sort((a, b) {
+        if (a["ok"] && !b["ok"])
+          return 1;
+        else if (!a["ok"] && b["ok"])
+          return -1;
+        else
+          return 0;
+      });
+
+      _saveData();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("toDo List"),
+        backgroundColor: Colors.purpleAccent,
+        centerTitle: true,
+      ),
+      body: Column(
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.fromLTRB(17.0, 1.0, 7.0, 1.0),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                    child: TextField(
+                  controller: _toDoController,
+                  decoration: InputDecoration(
+                    labelText: "Nova Tarefa",
+                    labelStyle: TextStyle(color: Colors.purpleAccent),
+                  ),
+                )),
+                RaisedButton(
+                  color: Colors.purpleAccent,
+                  child: Text("ADD"),
+                  textColor: Colors.white,
+                  onPressed: _addToDo,
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+              child: RefreshIndicator(
+            onRefresh: _refresh,
+            child: ListView.builder(
+                padding: EdgeInsets.only(top: 10.0),
+                itemCount: _toDoList.length,
+                itemBuilder: buildItem),
+          )),
+        ],
+      ),
+    );
+  }
+
+  Widget buildItem(context, index) {
+    return Dismissible(
+      key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
+      background: Container(
+        color: Colors.red,
+        child: Align(
+          alignment: Alignment(-0.9, 0.0),
+          child: Icon(Icons.delete, color: Colors.white),
+        ),
+      ),
+      direction: DismissDirection.startToEnd,
+      child: CheckboxListTile(
+        title: Text(_toDoList[index]["title"]),
+        value: _toDoList[index]["ok"],
+        secondary: CircleAvatar(
+          child: Icon(_toDoList[index]["ok"] ? Icons.check : Icons.error),
+        ),
+        subtitle: Text(_toDoList[index]["dataBase"]),
+        onChanged: (check) {
+          setState(() {
+            _toDoList[index]["ok"] = check;
+            _saveData();
+          });
+        },
+      ),
+      onDismissed: (direction) {
+        setState(() {
+          _lastRemove = Map.from(_toDoList[index]);
+          _lastRemovepos = index;
+          _toDoList.removeAt(index);
+
+          _saveData();
+
+          final snack = SnackBar(
+            content: Text("Tarefa \"${_lastRemove["title"]}\" removida!"),
+            action: SnackBarAction(
+                label: "desfazer",
+                onPressed: () {
+                  setState(() {
+                    _toDoList.insert(_lastRemovepos, _lastRemove);
+                    _saveData();
+                  });
+                }),
+            duration: Duration(seconds: 5),
+          );
+          Scaffold.of(context).showSnackBar(snack);
+        });
+      },
+    );
   }
 
   Future<File> _getFile() async {
@@ -37,14 +171,12 @@ class _HomeState extends State<Home> {
   }
 
   Future<String> _readData() async {
-    try{
+    try {
       final file = await _getFile();
+
       return file.readAsString();
-    }catch(e){
+    } catch (e) {
       return null;
     }
   }
-
 }
-
-

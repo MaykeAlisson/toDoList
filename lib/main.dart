@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 void main() {
   runApp(MaterialApp(
     home: Home(),
+//    debugShowCheckedModeBanner: false,
   ));
 }
 
@@ -68,32 +69,56 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         title: Text("toDo List"),
-        backgroundColor: Colors.purpleAccent,
+        backgroundColor: Colors.purple,
         centerTitle: true,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.purple,
+        child: Icon(Icons.add),
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text("Adicionar Tarefa"),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      TextField(
+                        autofocus: true,
+                        decoration: InputDecoration(labelText: "Digite sua tarefa"),
+                        controller: _toDoController,
+                        onChanged: (_toDoController) {},
+                      ),
+                      TextField(
+                        decoration: InputDecoration(labelText: "Digite sua tarefa"),
+                        controller: _toDoController,
+                        onChanged: (_toDoController) {},
+                      )
+                    ],
+                  ),
+                  actions: <Widget>[
+                    FlatButton(
+                      child: Text("Cancelar"),
+                      onPressed: (){
+                        Navigator.pop(context);
+                      },
+                    ),
+                    FlatButton(
+                      child: Text("Salvar"),
+                      onPressed: (){
+                        _addToDo();
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                );
+              });
+        },
       ),
       body: Column(
         children: <Widget>[
-          Container(
-            padding: EdgeInsets.fromLTRB(17.0, 1.0, 7.0, 1.0),
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                    child: TextField(
-                  controller: _toDoController,
-                  decoration: InputDecoration(
-                    labelText: "Nova Tarefa",
-                    labelStyle: TextStyle(color: Colors.purpleAccent),
-                  ),
-                )),
-                RaisedButton(
-                  color: Colors.purpleAccent,
-                  child: Text("ADD"),
-                  textColor: Colors.white,
-                  onPressed: _addToDo,
-                ),
-              ],
-            ),
-          ),
           Expanded(
               child: RefreshIndicator(
             onRefresh: _refresh,
@@ -123,6 +148,8 @@ class _HomeState extends State<Home> {
         value: _toDoList[index]["ok"],
         secondary: CircleAvatar(
           child: Icon(_toDoList[index]["ok"] ? Icons.check : Icons.error),
+          backgroundColor: _toDoList[index]["ok"] ? Colors.green : Colors.white,
+          foregroundColor: _toDoList[index]["ok"] ? Colors.white : Colors.red,
         ),
         subtitle: Text(_toDoList[index]["dataBase"]),
         onChanged: (check) {

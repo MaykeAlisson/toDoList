@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -18,6 +20,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final _toDoController = TextEditingController();
+  final _dataController = TextEditingController();
+  final format = DateFormat("dd-MM-yyyy");
 
   List _toDoList = [];
 
@@ -41,8 +45,7 @@ class _HomeState extends State<Home> {
       newToDo["title"] = _toDoController.text;
       _toDoController.text = "";
       newToDo["ok"] = false;
-      newToDo["dataBase"] = "dataTarefa";
-      newToDo["dataFim"] = "dataConcluida";
+      newToDo["dataBase"] = _dataController.text.toString();
       _toDoList.add(newToDo);
       _saveData();
     });
@@ -68,7 +71,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("toDo List"),
+        title: Text("ToDo List"),
         backgroundColor: Colors.purple,
         centerTitle: true,
       ),
@@ -87,27 +90,31 @@ class _HomeState extends State<Home> {
                     children: <Widget>[
                       TextField(
                         autofocus: true,
-                        decoration: InputDecoration(labelText: "Digite sua tarefa"),
+                        decoration:
+                            InputDecoration(labelText: "Digite sua tarefa"),
                         controller: _toDoController,
                         onChanged: (_toDoController) {},
                       ),
-                      TextField(
-                        decoration: InputDecoration(labelText: "Digite sua tarefa"),
-                        controller: _toDoController,
-                        onChanged: (_toDoController) {},
-                      )
+                      Divider(),
+                      buildData(context),
+//                      TextField(
+//                        decoration:
+//                            InputDecoration(labelText: "Digite sua tarefa"),
+//                        controller: _toDoController,
+//                        onChanged: (_toDoController) {},
+//                      )
                     ],
                   ),
                   actions: <Widget>[
                     FlatButton(
                       child: Text("Cancelar"),
-                      onPressed: (){
+                      onPressed: () {
                         Navigator.pop(context);
                       },
                     ),
                     FlatButton(
                       child: Text("Salvar"),
-                      onPressed: (){
+                      onPressed: () {
                         _addToDo();
                         Navigator.pop(context);
                       },
@@ -205,5 +212,22 @@ class _HomeState extends State<Home> {
     } catch (e) {
       return null;
     }
+  }
+
+  Widget buildData(context) {
+    return Column(children: <Widget>[
+      Text('Data', textAlign: TextAlign.left,),
+      DateTimeField(
+        controller: _dataController,
+        format: format,
+        onShowPicker: (context, currentValue) {
+          return showDatePicker(
+              context: context,
+              firstDate: DateTime(1900),
+              initialDate: currentValue ?? DateTime.now(),
+              lastDate: DateTime(2100));
+        },
+      ),
+    ]);
   }
 }

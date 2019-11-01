@@ -5,9 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(MaterialApp(
+      localizationsDelegates: [
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate
+      ],
+    supportedLocales: [const Locale('pt', 'BR')],
     home: Home(),
 //    debugShowCheckedModeBanner: false,
   ));
@@ -95,14 +101,7 @@ class _HomeState extends State<Home> {
                         controller: _toDoController,
                         onChanged: (_toDoController) {},
                       ),
-                      Divider(),
                       buildData(context),
-//                      TextField(
-//                        decoration:
-//                            InputDecoration(labelText: "Digite sua tarefa"),
-//                        controller: _toDoController,
-//                        onChanged: (_toDoController) {},
-//                      )
                     ],
                   ),
                   actions: <Widget>[
@@ -223,9 +222,9 @@ class _HomeState extends State<Home> {
         onShowPicker: (context, currentValue) {
           return showDatePicker(
               context: context,
-              firstDate: DateTime(1900),
+              firstDate: DateTime(2019),
               initialDate: currentValue ?? DateTime.now(),
-              lastDate: DateTime(2100));
+              lastDate: DateTime(2050));
         },
       ),
     ]);

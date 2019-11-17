@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:intl/intl.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -27,7 +25,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final _toDoController = TextEditingController();
   final _dataController = TextEditingController();
-  final format = DateFormat("dd-MM-yyyy");
+
 
   List _toDoList = [];
 
@@ -101,7 +99,6 @@ class _HomeState extends State<Home> {
                         controller: _toDoController,
                         onChanged: (_toDoController) {},
                       ),
-                      buildData(context),
                     ],
                   ),
                   actions: <Widget>[
@@ -114,8 +111,11 @@ class _HomeState extends State<Home> {
                     FlatButton(
                       child: Text("Salvar"),
                       onPressed: () {
-                        _addToDo();
-                        Navigator.pop(context);
+                        if(_toDoController.text != ""){
+                          _addToDo();
+                          Navigator.pop(context);
+                        }
+
                       },
                     )
                   ],
@@ -213,20 +213,5 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Widget buildData(context) {
-    return Column(children: <Widget>[
-      Text('Data', textAlign: TextAlign.left,),
-      DateTimeField(
-        controller: _dataController,
-        format: format,
-        onShowPicker: (context, currentValue) {
-          return showDatePicker(
-              context: context,
-              firstDate: DateTime(2019),
-              initialDate: currentValue ?? DateTime.now(),
-              lastDate: DateTime(2050));
-        },
-      ),
-    ]);
-  }
+
 }
